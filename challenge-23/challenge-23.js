@@ -23,3 +23,72 @@ multiplicação (x), então no input deve aparecer "1+2x".
 input;
 - Ao pressionar o botão "CE", o input deve ficar zerado.
 */
+(function (win, doc) {
+  'use strict';
+
+  var $display = doc.querySelector('[data-js=inputDisplay]');
+  var $buttonsNumbers = doc.querySelectorAll('[data-js=buttonNumber]');
+  var $buttonsOperations = doc.querySelectorAll('[data-js=buttonOperation]');
+  var $buttonEqual = doc.querySelector('[data-js=buttonEqual]');
+  var $buttonReset = doc.querySelector('[data-js=buttonReset]');
+
+  $buttonsNumbers.forEach(function(e) {
+    e.addEventListener('click', handleNumbers);
+  });
+  $buttonsOperations.forEach(function(e) {
+    e.addEventListener('click', handleOperations);
+  });
+  $buttonEqual.addEventListener('click', handleEqual);
+  $buttonReset.addEventListener('click', handleReset);
+
+  function handleNumbers() {
+    if ($display.value === '0') {
+      $display.value = '';
+    }
+    $display.value += this.value;
+  }
+
+  function handleOperations() {
+    $display.value = $display.value.replace(/[+\-x÷]$/, '');
+    $display.value += this.value;
+  }
+
+  function handleEqual() {
+    $display.value = $display.value.replace(/[+\-x÷]$/, '');
+    var expression = $display.value;
+
+    while (expression.match(/\d+[x÷]\d+/) !== null) {
+      var expressionPart = expression.match(/\d+[x÷]\d+/)[0];
+      expression = expression.replace(expressionPart, simpleCalc(expressionPart));
+    }
+
+    while (expression.match(/\d+[+\-]\d+/) !== null) {
+      var expressionPart = expression.match(/\d+[+\-]\d+/)[0];
+      expression = expression.replace(expressionPart, simpleCalc(expressionPart));
+    }
+
+    $display.value = expression;
+
+    function simpleCalc(expression) {
+      var numbers = expression.split(/[+\-x÷]/);
+      var num1 = +numbers[0];
+      var num2 = +numbers[1];
+      var operation = expression.match(/[+\-x÷]/)[0];
+      switch (operation) {
+        case '+':
+          return num1 + num2;
+        case '-':
+          return num1 - num2;
+        case 'x':
+          return num1 * num2;
+        case '÷':
+          return num1 / num2;
+      }
+    }
+  }
+
+  function handleReset() {
+    $display.value = '0';
+  }
+
+})(window, document);
